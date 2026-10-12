@@ -1,4 +1,4 @@
-"""Genera el mismo dataset AMI que los laboratorios Hadoop y Kafka."""
+"""Genera el dataset AMI sintético: catálogo de medidores y lecturas diarias en CSV."""
 import csv
 from pathlib import Path
 

@@ -4,9 +4,8 @@ Laboratorio dedicado a entender **Apache Spark como motor distribuido**: ejecuci
 executors, RDDs, DataFrames y Catalyst, shuffle, particionamiento, AQE, persistencia, Delta Lake, Structured Streaming,
 MLlib, tolerancia a fallos y Spark History Server.
 
-El dataset es el mismo de los repos especializados de Hadoop y Kafka: 1.000 medidores inteligentes, 30 días de
-lecturas de energía, catálogo por ciudad y datos con anomalías. Esto permite comparar las mismas cargas en distintas
-arquitecturas.
+El dataset es sintético y reproducible: 1.000 medidores inteligentes, 30 días de lecturas de energía, catálogo por
+ciudad y datos con anomalías.
 
 ## Arquitectura
 
@@ -21,8 +20,8 @@ Diagrama editable: [`docs/architecture.drawio`](docs/architecture.drawio).
 | `spark-lab` | Driver interactivo, PySpark, CLI y JupyterLab |
 | `spark-history` | Reconstruye las Spark UIs desde event logs persistidos |
 
-El dataset y los resultados se comparten mediante el volumen del proyecto. En este laboratorio es almacenamiento local
-compartido; las lecciones se concentran en el motor Spark y no requieren Hadoop o Kafka.
+El dataset y los resultados se comparten mediante el volumen del proyecto. Es almacenamiento local compartido; las
+lecciones se concentran en el motor Spark.
 
 ## Requisitos y arranque
 
@@ -59,7 +58,7 @@ en `data/`; `python lessons/00_seed.py` regenera el origen.
 
 | # | Tema | Conceptos observables |
 | --- | --- | --- |
-| 00 | Dataset | Semilla sintética común a los tres repos |
+| 00 | Dataset | Semilla sintética reproducible |
 | 01 | Modelo de ejecución | Driver, master, workers, ejecutores, RDD, DAG, stages y tasks |
 | 02 | Spark SQL | Catalyst, schema, predicate pushdown y column pruning |
 | 03 | Particiones | Narrow/wide, shuffle, repartition, coalesce y skew |
