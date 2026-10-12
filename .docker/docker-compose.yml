@@ -1,0 +1,88 @@
+name: spark-processing-architecture
+
+x-spark: &spark
+  build:
+    context: ..
+    dockerfile: .docker/Dockerfile
+  image: spark-processing-architecture:local
+  environment: &spark-env
+    SPARK_HOME: /usr/local/lib/python3.13/site-packages/pyspark
+    PYSPARK_PYTHON: /usr/local/bin/python
+    PYTHONPATH: /app/src
+    SPARK_LOCAL_IP: 0.0.0.0
+    SPARK_CONF_DIR: /app/.docker
+    TZ: America/Bogota
+  volumes:
+    - ..:/app
+  restart: unless-stopped
+
+services:
+  spark-master:
+    <<: *spark
+    container_name: SparkMaster
+    hostname: spark-master
+    environment:
+      <<: *spark-env
+      SPARK_MASTER_OPTS: "-Dspark.deploy.recoveryMode=FILESYSTEM -Dspark.deploy.recoveryDirectory=/app/data/master-recovery"
+    command: ["/usr/local/lib/python3.13/site-packages/pyspark/bin/spark-class", "org.apache.spark.deploy.master.Master", "--host", "spark-master", "--port", "7077", "--webui-port", "8081"]
+    ports:
+      - "7077:7077"
+      - "8081:8081"
+
+  spark-worker1:
+    <<: *spark
+    container_name: SparkWorker1
+    hostname: spark-worker1
+    environment:
+      <<: *spark-env
+      SPARK_WORKER_CORES: 2
+      SPARK_WORKER_MEMORY: 1200m
+      SPARK_WORKER_WEBUI_PORT: 8082
+    command: ["/usr/local/lib/python3.13/site-packages/pyspark/bin/spark-class", "org.apache.spark.deploy.worker.Worker", "--host", "spark-worker1", "--webui-port", "8082", "spark://spark-master:7077"]
+    ports:
+      - "8082:8082"
+    depends_on: [spark-master]
+
+  spark-worker2:
+    <<: *spark
+    container_name: SparkWorker2
+    hostname: spark-worker2
+    environment:
+      <<: *spark-env
+      SPARK_WORKER_CORES: 2
+      SPARK_WORKER_MEMORY: 1200m
+      SPARK_WORKER_WEBUI_PORT: 8083
+    command: ["/usr/local/lib/python3.13/site-packages/pyspark/bin/spark-class", "org.apache.spark.deploy.worker.Worker", "--host", "spark-worker2", "--webui-port", "8083", "spark://spark-master:7077"]
+    ports:
+      - "8083:8083"
+    depends_on: [spark-master]
+
+  spark-history:
+    <<: *spark
+    container_name: SparkHistory
+    hostname: spark-history
+    command: ["/bin/sh", "-c", "SPARK_HISTORY_OPTS='-Dspark.history.fs.logDirectory=file:/app/data/eventlog' /usr/local/lib/python3.13/site-packages/pyspark/sbin/start-history-server.sh && tail -f /dev/null"]
+    environment:
+      <<: *spark-env
+      SPARK_HISTORY_OPTS: "-Dspark.history.fs.logDirectory=file:/app/data/eventlog"
+    ports:
+      - "18080:18080"
+    depends_on: [spark-master]
+
+  spark-lab:
+    <<: *spark
+    container_name: SparkLab
+    hostname: spark-lab
+    command: ["/bin/sh", "-c", "mkdir -p /app/data/eventlog && jupyter lab --allow-root --ip=0.0.0.0 --port=8892 --no-browser --ServerApp.token='' --ServerApp.password=''"]
+    environment:
+      <<: *spark-env
+      SPARK_MASTER: spark://spark-master:7077
+      SPARK_DRIVER_HOST: spark-lab
+      SPARK_UI_PORT: 4041
+      SPARK_CONF_DIR: /app/.docker
+      SPARK_EVENTLOG_ENABLED: "true"
+      SPARK_EVENTLOG_DIR: file:/app/data/eventlog
+    ports:
+      - "8892:8892"
+      - "4041:4041"
+    depends_on: [spark-master, spark-worker1, spark-worker2]

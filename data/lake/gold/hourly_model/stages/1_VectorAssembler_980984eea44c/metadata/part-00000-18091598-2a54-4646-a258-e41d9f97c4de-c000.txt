@@ -1,0 +1,1 @@
+{"class":"org.apache.spark.ml.feature.VectorAssembler","timestamp":1791773342815,"sparkVersion":"4.2.0","uid":"VectorAssembler_980984eea44c","paramMap":{"inputCols":["city_idx","type_idx","contracted_kw","hour_of_day","day_of_week","voltage"],"outputCol":"features"},"defaultParamMap":{"handleInvalid":"error","outputCol":"VectorAssembler_980984eea44c__output"}}
